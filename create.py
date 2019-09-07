@@ -3,48 +3,57 @@ from models import User, House
 
 class Facade:
     def __init__(self):
-        self.graph = Graph(host='localhost', port='7687', user='ana', password='neo4j')
+        self.graph = Graph(host='localhost', port='7687', user='neo4j', password='admin')
 
     def create_user(self, user):
         node = Node("User", name=user.nome, nTelefone=user.n_telefone, email=user.email, senha=user.senha)
         self.graph.create(node)
 
     
-    def set_user_properties(self, user):
+    def set_user_properties(self, email, properties):
         matcher = NodeMatcher(self.graph)
-        node = matcher.match("User", email=user.email).first()
+        node = matcher.match("User", email=email).first()
 
         if(node != None):
-            node['sexo'] = user.sexo
-            node['isLimpo'] = user.is_limpo
-            node['isOrganizado'] = user.is_organizado
-            node['isExtrovertido'] = user.is_extrovertido
-            node['isIntrovertido'] = user.is_introvertido
-            node['isResponsavel'] = user.is_responsavel
-            node['gostaDeAnimais'] = user.gosta_de_animais
+            node['sexo'] = properties['sexo']
+            node['isLimpo'] = properties['is_limpo']
+            node['isOrganizado'] = properties['is_organizado']
+            node['isExtrovertido'] = properties['is_extrovertido']
+            node['isIntrovertido'] = properties['is_introvertido']
+            node['isResponsavel'] = properties['is_responsavel']
+            node['gostaDeAnimais'] = properties['gosta_de_animais']
 
             self.graph.push(node)
             
-    def create_house(self, house):
-        node = Node('House', cidade=house.cidade, bairro=house.bairro, numero=house.numero, qtdMoradores=house.qtd_moradores, possuiAnimais=house.animais, tipoMoradia=house.tipo, imgBytes=house.img_bytes, emailDono=house.email_dono)
+    def create_house(self, properties):
+        node = Node('House', cidade=properties['cidade'], bairro=properties['bairro'], numero=properties['numero'], qtdMoradores=properties['qtdMoradores'], possuiAnimais=properties['animais'], tipoMoradia=properties['tipo'], imgBytes=properties['imgBytes'], emailDono=properties['emailDono'])
         self.graph.create(node)
+        status = self.create_ownership(properties['emailDono'], node)
+        return status
 
-
-    def get_user(self, user):
+    
+    def get_user(self, email):
         matcher = NodeMatcher(self.graph)
-        node = matcher.match("User", email=user.email).first()
+        node = matcher.match("User", email=email).first()
+        return node
+    
+    def get_house(self, email_dono, house):
+        matcher = NodeMatcher(self.graph)
+        node = matcher.match('House', emailDono=email_dono).first()
         return node
 
-    def get_house(self, user, house):
-        matcher = NodeMatcher(self.graph)
-        node = matcher.match('House', emailDono=user.email).first()
-        return node
-
+    #ajeitar o get user daqui
     def create_match(self, user1, user2):
         relationship = Relationship(self.get_user(user1), "matches", self.get_user(user2))
         relationship['compatibility'] = user1.compare_users(user2)
         self.graph.create(relationship)
     
-    def create_ownership(self, user, house):
-        relationship = Relationship(self.get_user(user), "possui", self.get_house(user, house))
-        self.graph.create(relationship)
+    def create_ownership(self, email_dono, house):
+        user = self.get_user(email_dono)
+        if (user != None):
+            relationship = Relationship(user, "possui", house)
+            self.graph.create(relationship)
+            return True
+        else:
+            return False
+        

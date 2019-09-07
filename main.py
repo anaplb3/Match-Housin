@@ -18,8 +18,3 @@ user1.set_atributes("feminino", "true", "true", "true", "false", "false", "false
 facade.set_user_properties(user1)
 
 facade.create_match(user, user1)
-
-
-
-
-
