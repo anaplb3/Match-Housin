@@ -1,7 +1,8 @@
 class User:
-    def __init__(self, nome, n_telefone, email, senha):
+    def __init__(self, nome, n_telefone, email, senha, username):
         self.nome = nome
         self.email = email
+        self.username = username
         self.n_telefone = n_telefone
         self.senha = senha
         self.sexo = None
@@ -42,7 +43,7 @@ class User:
 
 
 class House:
-    def __init__(self, cidade, bairro, numero, qtd_moradores, animais, tipo, img_bytes, email_dono):
+    def __init__(self, cidade, bairro, numero, qtd_moradores, animais, tipo, img_bytes, username_dono):
         self.cidade = cidade
         self.bairro = bairro
         self.numero = numero
@@ -50,4 +51,4 @@ class House:
         self.animais = animais
         self.tipo = tipo
         self.img_bytes = img_bytes
-        self.email_dono = email_dono
+        self.username_dono = username_dono
